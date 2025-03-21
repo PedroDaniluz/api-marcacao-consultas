@@ -4,6 +4,7 @@ import com.fiap.eca.api_marcacao_consultas.security.JwtAuthenticationFilter;
 import com.fiap.eca.api_marcacao_consultas.security.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -24,12 +25,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/usuarios",
                                 "/usuarios/login",
                                 "/h2-console/**" // PERMITE ACESSO AO H2
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuarios").permitAll() // Permite criar usuário sem autenticação
+                        .requestMatchers(HttpMethod.GET, "/usuarios").authenticated() // Requer autenticação para listar usuários
+                        .requestMatchers(HttpMethod.POST, "/consultas").authenticated()
                         .anyRequest().authenticated()
                 )
+                // resto da configuração permanece igual
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.disable())
                         .contentSecurityPolicy(csp -> csp
@@ -42,4 +46,5 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 }
